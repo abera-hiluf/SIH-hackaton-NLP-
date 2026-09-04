@@ -4,5 +4,7 @@ __pycache__/
 venv/
 .env
 
-# Generated demo data is intentionally kept as a small, reproducible artifact.
+# Local human-review decisions are runtime persistence, not source data.
+data/review_feedback.csv
 
+# Generated demo data is intentionally kept as a small, reproducible artifact.

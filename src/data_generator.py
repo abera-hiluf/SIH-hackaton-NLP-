@@ -18,6 +18,7 @@ DEFAULT_ROWS = 500
 OUTPUT_PATH = Path(__file__).resolve().parents[1] / "data" / "synthetic_reports.csv"
 
 SITES = ["Digboi", "Duliajan", "Bongaigaon", "Geleki", "Naharkatiya"]
+AREAS = ["Process Unit", "Tank Farm", "Workshop", "Pipeline Corridor", "Main Gate"]
 
 SCENARIOS = {
     "Energy Isolation": {
@@ -78,6 +79,26 @@ SCENARIOS = {
     },
 }
 
+PRECURSOR_LABELS = {
+    "Energy Isolation": "Isolation verification failure",
+    "Hot Work": "Hot work control failure",
+    "Confined Space": "Confined-space control gap",
+    "Line of Fire": "Line-of-fire exposure",
+    "Working at Height": "Fall protection gap",
+    "Lifting Operations": "Lifting control failure",
+    "Driving / Vehicle Safety": "Vehicle safety control gap",
+}
+
+HAZARD_LABELS = {
+    "Energy Isolation": "unexpected energy release",
+    "Hot Work": "ignition or flammable-material exposure",
+    "Confined Space": "atmospheric or rescue hazard",
+    "Line of Fire": "stored-energy or moving-object exposure",
+    "Working at Height": "fall or dropped-object exposure",
+    "Lifting Operations": "suspended-load exposure",
+    "Driving / Vehicle Safety": "vehicle collision or load-shift exposure",
+}
+
 
 def _report_text(
     category: str,
@@ -120,11 +141,18 @@ def generate_reports(n_rows: int = DEFAULT_ROWS, seed: int = SEED) -> pd.DataFra
                 "report_id": f"SYN-{index + 1:04d}",
                 "date": (start + timedelta(days=rng.randint(0, 730))).isoformat(),
                 "site": rng.choice(SITES),
+                "location": f"{rng.choice(SITES)} — {rng.choice(AREAS)}",
+                "report_type": rng.choice(["Near Miss", "Safety Observation", "Hazard Report"]),
                 "activity": f"{category} — {rng.choice(scenario['activities'])}",
                 "report_text": _report_text(category, scenario, sif_potential, rng),
                 "sif_potential": "Yes" if sif_potential else "No",
+                "sif_confidence": round(rng.uniform(0.78, 0.97) if sif_potential else rng.uniform(0.70, 0.94), 3),
                 "life_saving_rule": scenario["rule"],
+                "precursor": PRECURSOR_LABELS[category],
+                "hazard": HAZARD_LABELS[category],
+                "barrier": "Critical control",
                 "barrier_failure": rng.choice(scenario["barriers"]),
+                "priority": "High" if sif_potential else rng.choice(["Low", "Medium"]),
             }
         )
 
